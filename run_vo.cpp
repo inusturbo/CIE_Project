@@ -55,24 +55,24 @@ int main()
 {
 	VTK_MODULE_INIT(vtkRenderingOpenGL);
 	VTK_MODULE_INIT(vtkInteractionStyle);
-	//¶¨Òå±äÁ¿
-	cout << "±¾³ÌĞòÓÃÓÚÊµÊ±»ñÈ¡µãÔÆ£¬²¢ÇÒ»ñµÃRGB¡¢Éî¶ÈÍ¼" << endl;
-	cout << "ÕıÔÚ³õÊ¼»¯Kinect V2..." << endl;
+	//å®šä¹‰å˜é‡
+	cout << "æœ¬ç¨‹åºç”¨äºå®æ—¶è·å–ç‚¹äº‘ï¼Œå¹¶ä¸”è·å¾—RGBã€æ·±åº¦å›¾" << endl;
+	cout << "æ­£åœ¨åˆå§‹åŒ–Kinect V2..." << endl;
 	libfreenect2::Freenect2 freenect2;
 	libfreenect2::Freenect2Device *dev = 0;
 	libfreenect2::PacketPipeline  *pipeline = 0;
 
 
-	//ËÑÑ°²¢³õÊ¼»¯´«¸ĞÆ÷
+	//æœå¯»å¹¶åˆå§‹åŒ–ä¼ æ„Ÿå™¨
 	if (freenect2.enumerateDevices() == 0)
 	{
-		std::cout << "Ã»ÓĞÁ¬½ÓKinect V2 ÇëÈ·±£Á¬½Ó³É¹¦ºóÖØÊÔ..." << std::endl;
+		std::cout << "æ²¡æœ‰è¿æ¥Kinect V2 è¯·ç¡®ä¿è¿æ¥æˆåŠŸåé‡è¯•..." << std::endl;
 		return -1;
 	}
 	string serial = freenect2.getDefaultDeviceSerialNumber();
-	std::cout << "Á¬½ÓKinect V2 ³É¹¦£¬Éè±¸ºÅÊÇ: " << serial << std::endl;
+	std::cout << "è¿æ¥Kinect V2 æˆåŠŸï¼Œè®¾å¤‡å·æ˜¯: " << serial << std::endl;
 
-	//ÅäÖÃ´«Êä¸ñÊ½
+	//é…ç½®ä¼ è¾“æ ¼å¼
 #if 1 // sean
 	int depthProcessor = Processor_cl;
 	if (depthProcessor == Processor_cpu)
@@ -90,7 +90,7 @@ int main()
 			pipeline = new libfreenect2::OpenGLPacketPipeline();
 		}
 #else
-		std::cout << "²»Ö§³Ö OpenGL ¹ÜÏß!" << std::endl;
+		std::cout << "ä¸æ”¯æŒ OpenGL ç®¡çº¿!" << std::endl;
 #endif
 	}
 	else if (depthProcessor == Processor_cl) // if support cl
@@ -99,13 +99,13 @@ int main()
 		if (!pipeline)
 			pipeline = new libfreenect2::OpenCLPacketPipeline();
 #else
-		std::cout << "²»Ö§³Ö OpenCL ¹ÜÏß!" << std::endl;
+		std::cout << "ä¸æ”¯æŒ OpenCL ç®¡çº¿!" << std::endl;
 #endif
 	}
 
 
 
-	//Æô¶¯Éè±¸
+	//å¯åŠ¨è®¾å¤‡
 	if (pipeline)
 	{
 		dev = freenect2.openDevice(serial, pipeline);
@@ -116,7 +116,7 @@ int main()
 	}
 	if (dev == 0)
 	{
-		std::cout << "Éè±¸´ò¿ªÊ§°Ü£¡" << std::endl;
+		std::cout << "è®¾å¤‡æ‰“å¼€å¤±è´¥ï¼" << std::endl;
 		return -1;
 	}
 	signal(SIGINT, sigint_handler);
@@ -129,13 +129,13 @@ int main()
 	dev->setColorFrameListener(&listener);
 	dev->setIrAndDepthFrameListener(&listener);
 
-	//Æô¶¯Êı¾İ´«Êä
+	//å¯åŠ¨æ•°æ®ä¼ è¾“
 	dev->start();
 
-	std::cout << "Éè±¸ĞòÁĞºÅ: " << dev->getSerialNumber() << std::endl;
-	std::cout << "Éè±¸¹Ì¼ş°æ±¾: " << dev->getFirmwareVersion() << std::endl;
+	std::cout << "è®¾å¤‡åºåˆ—å·: " << dev->getSerialNumber() << std::endl;
+	std::cout << "è®¾å¤‡å›ºä»¶ç‰ˆæœ¬: " << dev->getFirmwareVersion() << std::endl;
 
-	//Ñ­»·½ÓÊÕ
+	//å¾ªç¯æ¥æ”¶
 	libfreenect2::Registration* registration = new libfreenect2::Registration(dev->getIrCameraParams(), dev->getColorCameraParams());
 	libfreenect2::Frame undistorted(512, 424, 4), registered(512, 424, 4), depth2rgb(1920, 1080 + 2, 4);
 	cv::viz::Viz3d vis("Visual Odometry");
@@ -164,8 +164,8 @@ int main()
 	camera_coor.setRenderingProperty(cv::viz::LINE_WIDTH, 1.0);
 	vis.showWidget("World", world_coor);
 	vis.showWidget("Camera", camera_coor);
-	pcl::visualization::CloudViewer viewer("Viewer");  //´´½¨Ò»¸öÏÔÊ¾µãÔÆµÄ´°¿Ú
-	PointCloud::Ptr cloud(new PointCloud); //Ê¹ÓÃÖÇÄÜÖ¸Õë£¬´´½¨Ò»¸ö¿ÕµãÔÆ¡£ÕâÖÖÖ¸ÕëÓÃÍê»á×Ô¶¯ÊÍ·Å¡£
+	pcl::visualization::CloudViewer viewer("Viewer");  //åˆ›å»ºä¸€ä¸ªæ˜¾ç¤ºç‚¹äº‘çš„çª—å£
+	PointCloud::Ptr cloud(new PointCloud); //ä½¿ç”¨æ™ºèƒ½æŒ‡é’ˆï¼Œåˆ›å»ºä¸€ä¸ªç©ºç‚¹äº‘ã€‚è¿™ç§æŒ‡é’ˆç”¨å®Œä¼šè‡ªåŠ¨é‡Šæ”¾ã€‚
 	while (!protonect_shutdown)
 	{
 		ifstream fin(configfilepath);
@@ -176,7 +176,7 @@ int main()
 			cout << endl;
 			cout << endl;
 			cout << endl;
-			cout << "Çë½«ÅäÖÃÎÄ¼şdefault.yaml·ÅÖÃµ½×ÀÃæslamprocessÎÄ¼ş¼ĞÏÂ£¬Íê³Éºó";
+			cout << "è¯·å°†é…ç½®æ–‡ä»¶default.yamlæ”¾ç½®åˆ°æ¡Œé¢slamprocessæ–‡ä»¶å¤¹ä¸‹ï¼Œå®Œæˆå";
 			system("pause");
 			continue;
 		}
@@ -194,7 +194,7 @@ int main()
 		cv::imshow("rgb", rgbmat);
 		string ii = to_string(i);
 		string pathrgb = s + "\\slamprocess\\rgb\\" + ii + ".jpg";
-		cout << "Í¼Æ¬´æ´¢³É¹¦: " << pathrgb << endl;
+		cout << "å›¾ç‰‡å­˜å‚¨æˆåŠŸ: " << pathrgb << endl;
 		cv::imwrite(pathrgb, rgbmat);
 
 		cout << "****** loop " << i << " ******" << endl;
@@ -253,7 +253,7 @@ int main()
 				uint8_t b = c[0];
 				uint8_t g = c[1];
 				uint8_t r = c[2];
-				if (z < 1.2 && y < 0.2)  //ÔİÊ±ÏÈÍ¨¹ıÏŞ¶¨xyzÀ´³ıÈ¥²»ĞèÒªµÄµã£¬µãÔÆ·Ö¸î»¹ÔÚÑ§Ï°ÖĞ¡£¡£¡£
+				if (z < 1.2 && y < 0.2)  //æš‚æ—¶å…ˆé€šè¿‡é™å®šxyzæ¥é™¤å»ä¸éœ€è¦çš„ç‚¹ï¼Œç‚¹äº‘åˆ†å‰²è¿˜åœ¨å­¦ä¹ ä¸­ã€‚ã€‚ã€‚
 				{
 					p.z = -z;
 					p.x = -x;
@@ -280,100 +280,5 @@ int main()
 
 #endif
 
-	std::cout << "³ÌĞòÍ£Ö¹!" << std::endl;
-
-
-
-
-
-
-
-
-
-
-	
-
-	//string dataset_dir = myslam::Config::get<string>("dataset_dir");
-	//cout << "dataset: " << dataset_dir << endl;
-	//ifstream fin(dataset_dir + "/associate.txt");
-	//if (!fin)
-	//{
-	//	cout << "please generate the associate file called associate.txt!" << endl;
-	//	return 1;
-	//}
-
-	//vector<string> rgb_files, depth_files;
-	//vector<double> rgb_times, depth_times;
-	//while (!fin.eof())
-	//{
-	//	string rgb_time, rgb_file, depth_time, depth_file;
-	//	fin >> rgb_time >> rgb_file >> depth_time >> depth_file;
-	//	rgb_times.push_back(atof(rgb_time.c_str()));
-	//	depth_times.push_back(atof(depth_time.c_str()));
-	//	rgb_files.push_back(dataset_dir + "/" + rgb_file);
-	//	depth_files.push_back(dataset_dir + "/" + depth_file);
-
-	//	if (fin.good() == false)
-	//		break;
-	//}
-
-	
-
-
-
-
-
-
-	
-
-	//cout << "read total " << rgb_files.size() << " entries" << endl;
-	//for (int i = 0; i < rgb_files.size(); i++)
-	//{
-	//	cout << "****** loop " << i << " ******" << endl;
-	//	Mat color = cv::imread(rgb_files[i]);
-	//	Mat depth = cv::imread(depth_files[i], -1);
-	//	if (color.data == nullptr || depth.data == nullptr)
-	//		break;
-	//	myslam::Frame::Ptr pFrame = myslam::Frame::createFrame();
-	//	pFrame->camera_ = camera;
-	//	pFrame->color_ = color;
-	//	pFrame->depth_ = depth;
-	//	pFrame->time_stamp_ = rgb_times[i];
-
-	//	boost::timer timer;
-	//	vo->addFrame(pFrame);
-	//	cout << "VO costs time: " << timer.elapsed() << endl;
-
-	//	if (vo->state_ == myslam::VisualOdometry::LOST)
-	//		break;
-	//	SE3 Twc = pFrame->T_c_w_.inverse();
-
-	//	// show the map and the camera pose
-	//	cv::Affine3d M(
-	//		cv::Affine3d::Mat3(
-	//			Twc.rotation_matrix() (0, 0), Twc.rotation_matrix() (0, 1), Twc.rotation_matrix() (0, 2),
-	//			Twc.rotation_matrix() (1, 0), Twc.rotation_matrix() (1, 1), Twc.rotation_matrix() (1, 2),
-	//			Twc.rotation_matrix() (2, 0), Twc.rotation_matrix() (2, 1), Twc.rotation_matrix() (2, 2)
-	//		),
-	//		cv::Affine3d::Vec3(
-	//			Twc.translation() (0, 0), Twc.translation() (1, 0), Twc.translation() (2, 0)
-	//		)
-	//	);
-
-	//	Mat img_show = color.clone();
-	//	for (auto& pt : vo->map_->map_points_)
-	//	{
-	//		myslam::MapPoint::Ptr p = pt.second;
-	//		Vector2d pixel = pFrame->camera_->world2pixel(p->pos_, pFrame->T_c_w_);
-	//		cv::circle(img_show, cv::Point2f(pixel(0, 0), pixel(1, 0)), 5, cv::Scalar(0, 255, 0), 2);
-	//	}
-
-	//	cv::imshow("image", img_show);
-	//	cv::waitKey(1);
-	//	vis.setWidgetPose("Camera", M);
-	//	vis.spinOnce(1, false);
-	//	cout << endl;
-	//}
-
-	//return 0;
+	std::cout << "ç¨‹åºåœæ­¢!" << std::endl;
 }
