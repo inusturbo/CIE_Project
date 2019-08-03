@@ -18,7 +18,6 @@
 #include <pcl/visualization/pcl_visualizer.h>
 #include <pcl/point_cloud.h>
 
-
 #include <boost/timer.hpp>
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -62,7 +61,6 @@ int main()
 	libfreenect2::Freenect2Device *dev = 0;
 	libfreenect2::PacketPipeline  *pipeline = 0;
 
-
 	//搜寻并初始化传感器
 	if (freenect2.enumerateDevices() == 0)
 	{
@@ -78,11 +76,11 @@ int main()
 	if (depthProcessor == Processor_cpu)
 	{
 		if (!pipeline)
-			//! [pipeline]
+		//! [pipeline]
 			pipeline = new libfreenect2::CpuPacketPipeline();
 		//! [pipeline]
 	}
-	else if (depthProcessor == Processor_gl) // if support gl
+	else if (depthProcessor == Processor_gl) // 如果支持gl
 	{
 #ifdef LIBFREENECT2_WITH_OPENGL_SUPPORT
 		if (!pipeline)
@@ -93,7 +91,7 @@ int main()
 		std::cout << "不支持 OpenGL 管线!" << std::endl;
 #endif
 	}
-	else if (depthProcessor == Processor_cl) // if support cl
+	else if (depthProcessor == Processor_cl) // 如果支持cl
 	{
 #ifdef LIBFREENECT2_WITH_OPENCL_SUPPORT
 		if (!pipeline)
@@ -102,8 +100,6 @@ int main()
 		std::cout << "不支持 OpenCL 管线!" << std::endl;
 #endif
 	}
-
-
 
 	//启动设备
 	if (pipeline)
@@ -142,53 +138,59 @@ int main()
 	Mat rgbmat, depthmat, rgbd, dst;
 	float x, y, z, color;
 
-	
 	TCHAR szPath[255];
 	SHGetSpecialFolderPath(NULL, szPath, CSIDL_DESKTOP, FALSE);
 	string s = szPath;
 	string cmd = "md -p " + s + "\\slamprocess\\rgb";
 	system(cmd.data());
 	string configfilepath = s + "\\slamprocess\\default.yaml";
-	myslam::Config::setParameterFile(configfilepath);
-	myslam::VisualOdometry::Ptr vo(new myslam::VisualOdometry);
+	
 	int i = 0;
-	myslam::Camera::Ptr camera(new myslam::Camera);
+	
+	while (true)
+	{
+		ifstream fin(configfilepath);
+			if (!fin)
+			{
+				cout << endl;
+				cout << endl;
+				cout << endl;
+				cout << endl;
+				cout << endl;
+				cout << "请将配置文件default.yaml放置到桌面slamprocess文件夹下，完成后";
+				system("pause");
+				continue;
+			}
+			else {
+				break;
+			}
+	}
 
+	myslam::Config::setParameterFile(configfilepath);
+	myslam::Camera::Ptr camera(new myslam::Camera);
+	myslam::VisualOdometry::Ptr vo(new myslam::VisualOdometry);
 	// visualization
 	
-	cv::viz::WCoordinateSystem world_coor(1.0), camera_coor(0.5);
-	cv::Point3d cam_pos(0, -1.0, -1.0), cam_focal_point(0, 0, 0), cam_y_dir(0, 1, 0);
-	cv::Affine3d cam_pose = cv::viz::makeCameraPose(cam_pos, cam_focal_point, cam_y_dir);
-	vis.setViewerPose(cam_pose);
-	world_coor.setRenderingProperty(cv::viz::LINE_WIDTH, 2.0);
-	camera_coor.setRenderingProperty(cv::viz::LINE_WIDTH, 1.0);
-	vis.showWidget("World", world_coor);
-	vis.showWidget("Camera", camera_coor);
+	//cv::viz::WCoordinateSystem world_coor(1.0), camera_coor(0.5);
+	//cv::Point3d cam_pos(0, -1.0, -1.0), cam_focal_point(0, 0, 0), cam_y_dir(0, 1, 0);
+	//cv::Affine3d cam_pose = cv::viz::makeCameraPose(cam_pos, cam_focal_point, cam_y_dir);
+	//vis.setViewerPose(cam_pose);
+	//world_coor.setRenderingProperty(cv::viz::LINE_WIDTH, 2.0);
+	//camera_coor.setRenderingProperty(cv::viz::LINE_WIDTH, 1.0);
+	//vis.showWidget("World", world_coor);
+	//vis.showWidget("Camera", camera_coor);
 	pcl::visualization::CloudViewer viewer("Viewer");  //创建一个显示点云的窗口
 	PointCloud::Ptr cloud(new PointCloud); //使用智能指针，创建一个空点云。这种指针用完会自动释放。
 	while (!protonect_shutdown)
 	{
-		ifstream fin(configfilepath);
-		if (!fin)
-		{
-			cout << endl;
-			cout << endl;
-			cout << endl;
-			cout << endl;
-			cout << endl;
-			cout << "请将配置文件default.yaml放置到桌面slamprocess文件夹下，完成后";
-			system("pause");
-			continue;
-		}
-		
 		listener.waitForNewFrame(frames);
 		libfreenect2::Frame *rgb = frames[libfreenect2::Frame::Color];
 		libfreenect2::Frame *depth = frames[libfreenect2::Frame::Depth];
 		registration->apply(rgb, depth, &undistorted, &registered, true, &depth2rgb);
-
-		//cloud->width = 512 * 424;
-		//cloud->height = 1;
-		//cloud->is_dense = true;
+//
+//		//cloud->width = 512 * 424;
+//		//cloud->height = 1;
+//		//cloud->is_dense = true;
 		cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data).copyTo(rgbmat);
 		cv::Mat(depth->height, depth->width, CV_32FC1, depth->data).copyTo(depthmat);
 		cv::imshow("rgb", rgbmat);
@@ -199,33 +201,32 @@ int main()
 
 		cout << "****** loop " << i << " ******" << endl;
 		Mat colormat = rgbmat;
-		//Mat depth = cv::imread(depth_files[i], -1);
-		//if (color.data == nullptr || depth.data == nullptr)
-		if (colormat.data == NULL)
-			break;
+//		//Mat depth = cv::imread(depth_files[i], -1);
+//		//if (color.data == nullptr || depth.data == nullptr)
+//		if (colormat.data == NULL)
+//			break;
 		myslam::Frame::Ptr pFrame = myslam::Frame::createFrame();
 		pFrame->camera_ = camera;
 		pFrame->color_ = colormat;
-		//pFrame->depth_ = depth;
 		pFrame->time_stamp_ = i;
 
 		boost::timer timer;
 		vo->addFrame(pFrame);
-		cout << "VO costs time: " << timer.elapsed() << endl;
+		//cout << "VO costs time: " << timer.elapsed() << endl;
 
-		if (vo->state_ == myslam::VisualOdometry::LOST)
-			//break;
-		SE3 Twc = pFrame->T_c_w_.inverse();
+		//if (vo->state_ == myslam::VisualOdometry::LOST)
+			//b reak;
+		//SE3 Twc = pFrame->T_c_w_.inverse();
 
-			// show the map and the camera pose
+		// show the map and the camera pose
 		cv::Affine3d M(
 			cv::Affine3d::Mat3(
-				Twc.rotation_matrix() (0, 0), Twc.rotation_matrix() (0, 1), Twc.rotation_matrix() (0, 2),
-				Twc.rotation_matrix() (1, 0), Twc.rotation_matrix() (1, 1), Twc.rotation_matrix() (1, 2),
-				Twc.rotation_matrix() (2, 0), Twc.rotation_matrix() (2, 1), Twc.rotation_matrix() (2, 2)
+				pFrame->T_c_w_.inverse().rotation_matrix() (0, 0), pFrame->T_c_w_.inverse().rotation_matrix() (0, 1), pFrame->T_c_w_.inverse().rotation_matrix() (0, 2),
+				pFrame->T_c_w_.inverse().rotation_matrix() (1, 0), pFrame->T_c_w_.inverse().rotation_matrix() (1, 1), pFrame->T_c_w_.inverse().rotation_matrix() (1, 2),
+				pFrame->T_c_w_.inverse().rotation_matrix() (2, 0), pFrame->T_c_w_.inverse().rotation_matrix() (2, 1), pFrame->T_c_w_.inverse().rotation_matrix() (2, 2)
 			),
 			cv::Affine3d::Vec3(
-				Twc.translation() (0, 0), Twc.translation() (1, 0), Twc.translation() (2, 0)
+				pFrame->T_c_w_.inverse().translation() (0, 0), pFrame->T_c_w_.inverse().translation() (1, 0), pFrame->T_c_w_.inverse().translation() (2, 0)
 			)
 		);
 
@@ -242,40 +243,39 @@ int main()
 		vis.setWidgetPose("Camera", M);
 		vis.spinOnce(1, false);
 		cout << endl;
-
-		for (int m = 0; m < 512; m++)
-		{
-			for (int n = 0; n < 424; n++)
-			{
-				PointT p;
-				registration->getPointXYZRGB(&undistorted, &registered, n, m, x, y, z, color);
-				const uint8_t *c = reinterpret_cast<uint8_t*>(&color);
-				uint8_t b = c[0];
-				uint8_t g = c[1];
-				uint8_t r = c[2];
-				if (z < 1.2 && y < 0.2)  //暂时先通过限定xyz来除去不需要的点，点云分割还在学习中。。。
-				{
-					p.z = -z;
-					p.x = -x;
-					p.y = -y;
-					p.b = b;
-					p.g = g;
-					p.r = r;
-				}
-				cloud->points.push_back(p);
-			}
-		}
-		viewer.showCloud(cloud);
-		int key = cv::waitKey(1);
-		protonect_shutdown = protonect_shutdown || (key > 0 && ((key & 0xFF) == 27)); // shutdown on escape
-		listener.release(frames);
-		Sleep(500);
-		i++;
+//
+//		for (int m = 0; m < 512; m++)
+//		{
+//			for (int n = 0; n < 424; n++)
+//			{
+//				PointT p;
+//				registration->getPointXYZRGB(&undistorted, &registered, n, m, x, y, z, color);
+//				const uint8_t *c = reinterpret_cast<uint8_t*>(&color);
+//				uint8_t b = c[0];
+//				uint8_t g = c[1];
+//				uint8_t r = c[2];
+//				if (z < 1.2 && y < 0.2)  //暂时先通过限定xyz来除去不需要的点，点云分割还在学习中。。。
+//				{
+//					p.z = -z;
+//					p.x = -x;
+//					p.y = -y;
+//					p.b = b;
+//					p.g = g;
+//					p.r = r;
+//				}
+//				cloud->points.push_back(p);
+//			}
+//		}
+//		viewer.showCloud(cloud);
+//		int key = cv::waitKey(1);
+//		protonect_shutdown = protonect_shutdown || (key > 0 && ((key & 0xFF) == 27)); // shutdown on escape
+//		listener.release(frames);
+//		Sleep(500);
+//		i++;
 	}
-
 	dev->stop();
 	dev->close();
-
+	
 	delete registration;
 
 #endif
